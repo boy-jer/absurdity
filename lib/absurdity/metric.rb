@@ -1,8 +1,18 @@
 module Absurdity
   class Metric
 
-    def self.track!(metric, options = {})
-      redis.set(key(metric, options), (count(key(metric, options)) || 0).to_i + 1)
+    def self.find(metric, experiment)
+      new(metric, experiment)
+    end
+
+    def initialize(metric, experiment)
+      @metric     = metric
+      @experiment = experiment
+    end
+
+    def track!(identity_id = nil)
+      @identity_id = identity_id
+      redis.set(key, (count || 0).to_i + 1)
     end
 
     def self.variant_for(experiment, identity_id, variants)
@@ -15,7 +25,7 @@ module Absurdity
       variant
     end
 
-    def self.count(key)
+    def count
       redis.get(key)
     end
 
@@ -25,10 +35,10 @@ module Absurdity
       Absurdity.redis
     end
 
-    def self.key(metric, options)
-      key = options[:experiment] ? "#{options[:experiment]}:" : ""
-      key += options[:variants] ? "#{variant_for(options[:experiment], options[:identity_id], options[:variants])}:" : ""
-      key += metric.to_s
+    def key
+      key = experiment.to_s
+      key += experiment.has_variants? ? ":#{experiment.variant_for(@identity_id)}" : ""
+      key += ":#{metric.to_s}"
       key
     end
 

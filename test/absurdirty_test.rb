@@ -12,5 +12,14 @@ class AbsurdityTest < MiniTest::Unit::TestCase
     Absurdity.redis = MockRedis.new
   end
 
+  def test_track_experiment_metric_without_variants
+    Absurdity::Experiment.create(:shared_contacts_link,
+                                [:clicked],
+                                [:with_photos, :without_photos],
+                                false)
+
+    Absurdity.track! :clicked, :shared_contacts_link
+  end
+
 end
 
