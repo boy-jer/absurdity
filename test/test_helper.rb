@@ -1,0 +1,5 @@
+require 'minitest/autorun'
+require 'mock_redis'
+require 'absurdity'
+require 'redis'
+require 'mocha'

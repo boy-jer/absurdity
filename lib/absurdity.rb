@@ -1,12 +1,13 @@
 module Absurdity
 
   autoload :Metric, "absurdity/metric"
+  autoload :Config, "absurdity/config"
 
   def self.redis
-    @@redis ||= Redis.new
+    Absurdity::Config.instance.redis
   end
 
   def self.redis=(redis)
-    @@redis = redis
+    Absurdity::Config.instance.redis = redis
   end
 end

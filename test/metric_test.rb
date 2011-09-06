@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'mock_redis'
-require 'absurdity'
+require 'test_helper'
 
 class MetricTest < MiniTest::Unit::TestCase
 
@@ -33,16 +31,16 @@ class MetricTest < MiniTest::Unit::TestCase
     experiment = :wicked
     metric = :clicked
     variants = [:with_sweetness, :without_sweetness]
-    variant_id = 1
+    identity_id = 1
 
     Absurdity::Metric.track! metric,
                              experiment: experiment,
                              variants: variants,
-                             variant_id: variant_id
+                             identity_id: identity_id
 
-    variant = Absurdity::Metric.variant_for(experiment: experiment,
-                                            variants: variants,
-                                            variant_id: variant_id)
+    variant = Absurdity::Metric.variant_for(experiment,
+                                            identity_id,
+                                            variants)
     key = "#{experiment}:#{variant}:#{metric}"
 
     assert_equal "1", Absurdity::Metric.count(key)

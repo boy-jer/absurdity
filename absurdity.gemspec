@@ -14,9 +14,10 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "absurdity"
 
-  s.add_dependency(%q<redis>, [">= 0"])
-  s.add_dependency(%q<rake>, ["0.8.7"])
-  s.add_development_dependency(%q<mock_redis>, [">= 0"])
+  s.add_dependency("redis", ">= 0")
+  s.add_dependency("rake", "0.8.7")
+  s.add_development_dependency("mock_redis", ">= 0")
+  s.add_development_dependency("mocha", ">= 0")
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
