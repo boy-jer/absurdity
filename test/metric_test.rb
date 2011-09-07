@@ -6,44 +6,30 @@ class MetricTest < MiniTest::Unit::TestCase
     Absurdity.redis = MockRedis.new
   end
 
-  def test_track_simple_metric
-    metric = :clicked
-    key = metric.to_s
-
-    assert_nil Absurdity::Metric.count(key)
-    Absurdity::Metric.track! metric
-    assert_equal "1", Absurdity::Metric.count(key)
-    Absurdity::Metric.track! metric
-    assert_equal "2", Absurdity::Metric.count(key)
-  end
-
-  def test_track_scoped_metric
-    experiment = :wicked
+  def test_track_metric
+    experiment = :shared_contacts_link
     metric = :clicked
     key = "#{experiment}:#{metric}"
 
-    assert_nil Absurdity::Metric.count(key)
-    Absurdity::Metric.track! metric, experiment: experiment
-    assert_equal "1", Absurdity::Metric.count(key)
+    metric = Absurdity::Metric.new(metric, experiment)
+
+    assert_equal 0, metric.count
+    metric.track!
+    assert_equal 1, metric.count
   end
 
-  def test_track_scoped_variant_metric
-    experiment = :wicked
+  def test_track_variant_metric
+    experiment = :shared_contacts_link
     metric = :clicked
-    variants = [:with_sweetness, :without_sweetness]
-    identity_id = 1
+    variant = :with_photos
+    # identity_id = 1
 
-    Absurdity::Metric.track! metric,
-                             experiment: experiment,
-                             variants: variants,
-                             identity_id: identity_id
 
-    variant = Absurdity::Metric.variant_for(experiment,
-                                            identity_id,
-                                            variants)
-    key = "#{experiment}:#{variant}:#{metric}"
+    metric = Absurdity::Metric.new(metric, experiment, variant)
 
-    assert_equal "1", Absurdity::Metric.count(key)
+    assert_equal 0, metric.count
+    metric.track!
+    assert_equal 1, metric.count
   end
 
 end
