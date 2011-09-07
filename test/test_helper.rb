@@ -7,7 +7,8 @@ require 'mocha'
 class MiniTest::Unit::TestCase
 
   def teardown
-    Absurdity.redis.flushdb
+    Absurdity.redis && Absurdity.redis.flushdb
+    Absurdity::Config.instance.instance_variable_set(:@redis, nil)
   end
 
 end

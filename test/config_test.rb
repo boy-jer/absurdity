@@ -2,13 +2,7 @@ require 'test_helper'
 
 class AbsurdityTest < MiniTest::Unit::TestCase
 
-  def test_redis_getter_uninitialized
-    ::Redis.expects(:new)
-
-    Absurdity::Config.instance.redis
-  end
-
-  def test_redis_setter
+  def test_redis_setter_and_getter
     a_redis = MockRedis.new
     Absurdity::Config.instance.redis = a_redis
 

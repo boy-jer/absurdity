@@ -5,7 +5,7 @@ module Absurdity
     include Singleton
 
     def redis
-      @redis ||= Redis.new
+      @redis
     end
 
     def redis=(redis)

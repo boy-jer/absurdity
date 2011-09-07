@@ -2,17 +2,13 @@ require 'test_helper'
 
 class AbsurdityTest < MiniTest::Unit::TestCase
 
-  def test_redis_getter_uninitialized
-    Absurdity::Config.instance.expects(:redis)
-    Absurdity.redis
+  def test_redis_setter_and_getter
+    a_redis = MockRedis.new
+    Absurdity.redis = a_redis
+    assert_equal a_redis, Absurdity.redis
   end
 
-  def test_redis_setter
-    Absurdity::Config.instance.expects(:redis=)
-    Absurdity.redis = MockRedis.new
-  end
-
-  def test_track_experiment_metric_without_variants
+  def test_track_experiment_metric_with_variants
     Absurdity.redis = MockRedis.new
     Absurdity::Experiment.create(:shared_contacts_link,
                                 [:clicked],

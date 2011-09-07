@@ -20,7 +20,7 @@ module Absurdity
 
     def metric(metric_slug)
       metric_slug = metrics.find { |m| m == metric_slug }
-      Metric.find("#{@slug}:#{metric_slug}")
+      Metric.find(metric_slug, @slug)
     end
 
     def ==(other_experiment)
