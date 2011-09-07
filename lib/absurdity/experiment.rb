@@ -1,11 +1,10 @@
 module Absurdity
   class Experiment
 
-    def self.create(slug, metrics, variants, identity_based)
+    def self.create(slug, metrics, variants=nil)
       base_key = base_key(slug)
       Config.instance.redis.set("#{base_key}:metrics", metrics.to_json)
       Config.instance.redis.set("#{base_key}:variants", variants.to_json)
-      Config.instance.redis.set("#{base_key}:identity_based", identity_based)
       new(slug)
     end
 
@@ -15,7 +14,13 @@ module Absurdity
 
     attr_reader :slug, :metrics, :variants
     def initialize(slug)
-      @slug           = slug
+      @slug = slug
+    end
+
+    def track!(metric, identity_id=nil)
+      # get variant for identity_id
+      # get metric
+      # metric.track!(variant || nil)
     end
 
     def metric(metric_slug)
@@ -39,11 +44,7 @@ module Absurdity
     end
 
     def identity_based?
-      @identity_based ||= get_identity_based
-    end
-
-    def has_variants?
-      variants
+      @identity_based ||= variants && !variants.empty?
     end
 
     private
@@ -64,8 +65,5 @@ module Absurdity
       JSON.parse(Config.instance.redis.get("#{base_key}:metrics")).map { |m| m.to_sym }
     end
 
-    def get_identity_based
-      Config.instance.redis.get("#{base_key}:identity_based") == "true"
-    end
   end
 end

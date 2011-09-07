@@ -14,8 +14,12 @@ module Absurdity
     Config.instance.redis = redis
   end
 
-  def self.track!(metric, experiment)
+  def self.track!(metric, experiment, identity_id=nil)
     experiment = Experiment.find(experiment)
-    experiment.metric(metric).track!
+    experiment.track! metric, identity_id
+  end
+
+  def self.count(metric, experiment)
+
   end
 end

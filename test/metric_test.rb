@@ -22,9 +22,6 @@ class MetricTest < MiniTest::Unit::TestCase
     experiment = :shared_contacts_link
     metric = :clicked
     variant = :with_photos
-    # identity_id = 1
-
-
     metric = Absurdity::Metric.new(metric, experiment, variant)
 
     assert_equal 0, metric.count

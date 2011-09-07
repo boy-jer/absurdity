@@ -13,8 +13,7 @@ class ExperimentTest < MiniTest::Unit::TestCase
   def test_find_and_test_create
     experiment = Absurdity::Experiment.create(@experiment_slug,
                                               @metrics,
-                                              @variants,
-                                              @identity_based)
+                                              @variants)
 
     assert_equal experiment, Absurdity::Experiment.find(@experiment_slug)
   end
