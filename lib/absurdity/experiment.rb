@@ -19,7 +19,7 @@ module Absurdity
 
     def track!(metric, identity_id=nil)
       # get variant for identity_id
-      # get metric
+      # metric(metric)
       # metric.track!(variant || nil)
     end
 
@@ -31,8 +31,7 @@ module Absurdity
     def ==(other_experiment)
       slug            == other_experiment.slug &&
       metrics         == other_experiment.metrics &&
-      variants        == other_experiment.variants &&
-      identity_based? == other_experiment.identity_based?
+      variants        == other_experiment.variants
     end
 
     def metrics
