@@ -16,10 +16,11 @@ module Absurdity
 
   def self.track!(metric, experiment, identity_id=nil)
     experiment = Experiment.find(experiment)
-    experiment.track! metric, identity_id
+    experiment.track!(metric, identity_id)
   end
 
   def self.count(metric, experiment)
-
+    experiment = Experiment.find(experiment)
+    experiment.count(metric)
   end
 end
