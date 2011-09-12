@@ -6,7 +6,6 @@ class ExperimentTest < MiniTest::Unit::TestCase
     @experiment_slug = :shared_contacts_link
     @metrics         = [:clicked, :seen]
     @variants        = [:with_photos, :without_photos]
-    @identity_based  = true
     Absurdity.redis = MockRedis.new
   end
 

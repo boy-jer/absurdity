@@ -57,6 +57,15 @@ module Absurdity
       @identity_based ||= variants && !variants.empty?
     end
 
+    def variant_for(identity_id)
+      variant = Config.instance.redis.get("#{base_key}:identity_id:#{identity_id}:variant")
+      if variant.nil?
+        variant = random_variant
+        Config.instance.redis.set("#{base_key}:identity_id:#{identity_id}:variant", variant)
+      end
+      variant
+    end
+
     private
 
     def self.base_key(slug)
@@ -73,15 +82,6 @@ module Absurdity
 
     def get_metrics
       JSON.parse(Config.instance.redis.get("#{base_key}:metrics")).map { |m| m.to_sym }
-    end
-
-    def variant_for(identity_id)
-      variant = Config.instance.redis.get("#{base_key}:identity_id:#{identity_id}:variant")
-      if variant.nil?
-        variant = random_variant
-        Config.instance.redis.set("#{base_key}:identity_id:#{identity_id}:variant", variant)
-      end
-      variant
     end
 
     def random_variant

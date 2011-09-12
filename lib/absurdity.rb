@@ -23,4 +23,9 @@ module Absurdity
     experiment = Experiment.find(experiment)
     experiment.count(metric)
   end
+
+  def self.variant(experiment, identity_id)
+    experiment = Experiment.find(experiment)
+    experiment.variant_for(identity_id)
+  end
 end

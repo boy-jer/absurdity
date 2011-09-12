@@ -52,5 +52,15 @@ class AbsurdityTest < MiniTest::Unit::TestCase
     assert_equal 0, count[:without_photos]
   end
 
+  def test_variant
+    Absurdity.redis = MockRedis.new
+    Absurdity::Experiment.any_instance.expects(:random_variant).returns(:with_photos)
+
+    Absurdity::Experiment.create(:shared_contacts_link,
+                                 [:clicked, :seen],
+                                 [:with_photos, :without_photos])
+
+    assert_equal :with_photos, Absurdity.variant(:shared_contacts_link, 1)
+  end
 end
 
