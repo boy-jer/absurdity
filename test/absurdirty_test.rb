@@ -8,6 +8,32 @@ class AbsurdityTest < MiniTest::Unit::TestCase
     assert_equal a_redis, Absurdity.redis
   end
 
+  def test_track_missing_experiment
+    Absurdity.redis = MockRedis.new
+
+    assert_raises Absurdity::Experiment::NotFoundError do
+      Absurdity.track! :clicked, :shared_contacts_link
+    end
+  end
+
+  def test_track_missing_metric
+    Absurdity.redis = MockRedis.new
+    Absurdity::Experiment.create(:shared_contacts_link,
+                                 [:clicked])
+
+    assert_raises Absurdity::Metric::NotFoundError do
+      Absurdity.track! :seen, :shared_contacts_link
+    end
+  end
+
+  def test_track_missing_variant
+
+  end
+
+  def test_track_missing_identity_id
+
+  end
+
   def test_track_experiment_metric_without_variants
     Absurdity.redis = MockRedis.new
     Absurdity::Experiment.create(:shared_contacts_link,

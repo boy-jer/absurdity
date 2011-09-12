@@ -1,20 +1,28 @@
 module Absurdity
   class Experiment
+    class NotFoundError < RuntimeError; end
 
     def self.create(slug, metrics, variants=[])
-      base_key = base_key(slug)
-      Config.instance.redis.set("#{base_key}:metrics", metrics.to_json)
-      Config.instance.redis.set("#{base_key}:variants", variants.to_json)
-      new(slug)
+      experiment = new(slug)
+      experiment.save
+      experiment
     end
 
     def self.find(slug)
-      new(slug)
+      experiment = new(slug)
+      raise NotFoundError if experiment.metrics.nil?
+      experiment
     end
 
     attr_reader :slug, :metrics, :variants
-    def initialize(slug)
-      @slug = slug
+    def initialize(slug, metric_slugs=nil, variants=nil)
+      @slug         = slug
+      @metric_slugs = metric_slugs
+    end
+
+    def save
+      create_metrics(@slug, @metric_slugs, variants)
+      Config.instance.redis.set("#{base_key}:variants", variants.to_json)
     end
 
     def track!(metric_slug, identity_id=nil)
@@ -68,20 +76,39 @@ module Absurdity
 
     private
 
-    def self.base_key(slug)
-      "experiments:#{slug}"
+    def create_metrics(slug, metrics, variants)
+      Config.instance.redis.set("#{base_key}:metrics", metrics.to_json)
+      metrics.each do |metric|
+        if !variants.empty?
+          variants.each do |variant|
+            Metric.create(metric, slug, variants)
+          end
+        else
+          Metric.create(metric, slug)
+        end
+      end
     end
 
     def base_key
-      self.class.base_key(slug)
+      "experiments:#{slug}"
     end
 
     def get_variants
-      JSON.parse(Config.instance.redis.get("#{base_key}:variants")).map { |v| v.to_sym }
+      metrics_json_string = Config.instance.redis.get("#{base_key}:variants")
+      if !metrics_json_string.nil?
+        JSON.parse(metrics_json_string).map { |v| v.to_sym }
+      else
+        metrics_json_string
+      end
     end
 
     def get_metrics
-      JSON.parse(Config.instance.redis.get("#{base_key}:metrics")).map { |m| m.to_sym }
+      metrics_json_string = Config.instance.redis.get("#{base_key}:metrics")
+      if !metrics_json_string.nil?
+        JSON.parse(metrics_json_string).map { |m| m.to_sym }
+      else
+        metrics_json_string
+      end
     end
 
     def random_variant
