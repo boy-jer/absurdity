@@ -14,7 +14,7 @@ module Absurdity
       experiment
     end
 
-    attr_reader :slug, :metrics, :variants
+    attr_reader :slug
     def initialize(slug, metric_slugs=nil, variant_slugs=[])
       @slug          = slug
       @metric_slugs  = metric_slugs
