@@ -1,7 +1,7 @@
 module Absurdity
   class Experiment
 
-    def self.create(slug, metrics, variants=nil)
+    def self.create(slug, metrics, variants=[])
       base_key = base_key(slug)
       Config.instance.redis.set("#{base_key}:metrics", metrics.to_json)
       Config.instance.redis.set("#{base_key}:variants", variants.to_json)
@@ -17,15 +17,26 @@ module Absurdity
       @slug = slug
     end
 
-    def track!(metric, identity_id=nil)
-      # get variant for identity_id
-      # metric(metric)
-      # metric.track!(variant || nil)
+    def track!(metric_slug, identity_id=nil)
+      variant = identity_id ? variant_for(identity_id) : nil
+      metric(metric_slug, variant).track!
     end
 
-    def metric(metric_slug)
+    def count(metric_slug)
+      if !variants.empty?
+        count = {}
+        variants.each do |variant|
+          count[variant] = metric(metric_slug, variant).count
+        end
+      else
+        count = metric(metric_slug).count
+      end
+      count
+    end
+
+    def metric(metric_slug, variant=nil)
       metric_slug = metrics.find { |m| m == metric_slug }
-      Metric.find(metric_slug, @slug)
+      Metric.find(metric_slug, @slug, variant)
     end
 
     def ==(other_experiment)
@@ -64,5 +75,17 @@ module Absurdity
       JSON.parse(Config.instance.redis.get("#{base_key}:metrics")).map { |m| m.to_sym }
     end
 
+    def variant_for(identity_id)
+      variant = Config.instance.redis.get("#{base_key}:identity_id:#{identity_id}:variant")
+      if variant.nil?
+        variant = random_variant
+        Config.instance.redis.set("#{base_key}:identity_id:#{identity_id}:variant", variant)
+      end
+      variant
+    end
+
+    def random_variant
+      variants.sort_by{rand}[0]
+    end
   end
 end

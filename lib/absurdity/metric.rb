@@ -9,10 +9,10 @@ module Absurdity
       @metric     = metric
       @experiment = experiment
       @variant    = variant
+      redis.get(key) || redis.set(key, 0)
     end
 
-    def track!(identity_id = nil)
-      @identity_id = identity_id
+    def track!
       redis.set(key, (count || 0).to_i + 1)
     end
 
