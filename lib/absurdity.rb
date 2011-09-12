@@ -1,6 +1,7 @@
 require 'json'
 
 module Absurdity
+  class MissingIdentityIDError < RuntimeError; end
 
   autoload :Metric,     "absurdity/metric"
   autoload :Config,     "absurdity/config"

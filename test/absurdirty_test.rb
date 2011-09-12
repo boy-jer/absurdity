@@ -26,12 +26,15 @@ class AbsurdityTest < MiniTest::Unit::TestCase
     end
   end
 
-  def test_track_missing_variant
-
-  end
-
   def test_track_missing_identity_id
+    Absurdity.redis = MockRedis.new
+    Absurdity::Experiment.create(:shared_contacts_link,
+                                 [:clicked],
+                                 [:with_photos, :without_photos])
 
+    assert_raises Absurdity::MissingIdentityIDError do
+      Absurdity.track! :seen, :shared_contacts_link
+    end
   end
 
   def test_track_experiment_metric_without_variants

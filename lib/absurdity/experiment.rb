@@ -27,7 +27,8 @@ module Absurdity
     end
 
     def track!(metric_slug, identity_id=nil)
-      variant = identity_id ? variant_for(identity_id) : nil
+      raise Absurdity::MissingIdentityIDError if identity_based? && identity_id.nil?
+      variant = identity_based? ? variant_for(identity_id) : nil
       metric(metric_slug, variant).track!
     end
 

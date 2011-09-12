@@ -3,7 +3,9 @@ module Absurdity
     class NotFoundError < RuntimeError; end
 
     def self.create(metric, experiment, variant=nil)
-      new(metric, experiment, variant).save
+      metric = new(metric, experiment, variant)
+      metric.save
+      metric
     end
 
     def self.find(metric, experiment, variant=nil)
@@ -19,15 +21,16 @@ module Absurdity
     end
 
     def save
+      # this keeps us from resetting a metric to 0
       redis.get(key) || redis.set(key, 0)
     end
 
     def track!
-      redis.set(key, (count || 0).to_i + 1)
+      redis.set(key, count + 1)
     end
 
     def count
-      (redis.get(key) || 0).to_i
+      redis.get(key).to_i
     end
 
     def key
@@ -36,6 +39,13 @@ module Absurdity
       key += ":#{@metric.to_s}"
       key
     end
+
+    def ==(other_metric)
+      @metric     == other_metric.instance_variable_get(:@metric)     &&
+      @experiment == other_metric.instance_variable_get(:@experiment) &&
+      @variant    == other_metric.instance_variable_get(:@variant)
+    end
+
 
     private
 
