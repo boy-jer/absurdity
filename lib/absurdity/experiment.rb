@@ -73,7 +73,7 @@ module Absurdity
         variant = random_variant
         Config.instance.redis.set("#{base_key}:identity_id:#{identity_id}:variant", variant)
       end
-      variant
+      variant.to_sym
     end
 
     private
