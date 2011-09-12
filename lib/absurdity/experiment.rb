@@ -3,7 +3,7 @@ module Absurdity
     class NotFoundError < RuntimeError; end
 
     def self.create(slug, metrics, variants=[])
-      experiment = new(slug)
+      experiment = new(slug, metrics, variants)
       experiment.save
       experiment
     end
@@ -15,14 +15,15 @@ module Absurdity
     end
 
     attr_reader :slug, :metrics, :variants
-    def initialize(slug, metric_slugs=nil, variants=nil)
-      @slug         = slug
-      @metric_slugs = metric_slugs
+    def initialize(slug, metric_slugs=nil, variant_slugs=[])
+      @slug          = slug
+      @metric_slugs  = metric_slugs
+      @variant_slugs = variant_slugs
     end
 
     def save
-      create_metrics(@slug, @metric_slugs, variants)
-      Config.instance.redis.set("#{base_key}:variants", variants.to_json)
+      create_variants
+      create_metrics
     end
 
     def track!(metric_slug, identity_id=nil)
@@ -76,16 +77,22 @@ module Absurdity
 
     private
 
-    def create_metrics(slug, metrics, variants)
-      Config.instance.redis.set("#{base_key}:metrics", metrics.to_json)
-      metrics.each do |metric|
-        if !variants.empty?
-          variants.each do |variant|
-            Metric.create(metric, slug, variants)
+    def create_metrics
+      Config.instance.redis.set("#{base_key}:metrics", @metric_slugs.to_json)
+      @metric_slugs.each do |metric_slug|
+        if !@variant_slugs.empty?
+          @variant_slugs.each do |variant_slug|
+            Metric.create(metric_slug, slug, variant_slug)
           end
         else
-          Metric.create(metric, slug)
+          Metric.create(metric_slug, slug)
         end
+      end
+    end
+
+    def create_variants
+      if !@variant_slugs.empty?
+        Config.instance.redis.set("#{base_key}:variants", @variant_slugs.to_json)
       end
     end
 
@@ -98,7 +105,7 @@ module Absurdity
       if !metrics_json_string.nil?
         JSON.parse(metrics_json_string).map { |v| v.to_sym }
       else
-        metrics_json_string
+        []
       end
     end
 
