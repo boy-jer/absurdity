@@ -1,4 +1,5 @@
 require 'json'
+require 'absurdity/railtie.rb' if defined?(Rails)
 
 module Absurdity
   class MissingIdentityIDError < RuntimeError; end
@@ -28,5 +29,13 @@ module Absurdity
   def self.variant(experiment, identity_id)
     experiment = Experiment.find(experiment)
     experiment.variant_for(identity_id)
+  end
+
+  def self.new_experiment(experiment_slug, metric_slugs, variant_slugs=nil)
+    begin
+      experiment = Experiment.find(experiment)
+    rescue Experiment::NotFoundError
+      Experiment.create(experiment_slug, metric_slugs, variant_slugs)
+    end
   end
 end
