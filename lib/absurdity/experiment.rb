@@ -64,13 +64,9 @@ module Absurdity
     def metrics
       return @metrics unless @metrics.nil?
       @metrics = []
-      get_metrics.each do |metric_slug|
+      get_metric_slugs.each do |metric_slug|
         if !variants.empty?
-          variants.each do |variant|
-            p metric_slug
-            p variant
-            @metrics << metric(metric_slug, variant)
-          end
+          variants.each { |variant| @metrics << metric(metric_slug, variant) }
         else
           @metrics << metric(metric_slug)
         end
@@ -96,7 +92,7 @@ module Absurdity
     end
 
     def metric_slugs
-      @metric_slugs || get_metrics
+      @metric_slugs || get_metric_slugs
     end
 
     private
@@ -142,7 +138,7 @@ module Absurdity
       end
     end
 
-    def get_metrics
+    def get_metric_slugs
       json_string = Config.instance.redis.get("#{base_key}:metrics")
       if !json_string.nil?
         JSON.parse(json_string).map { |m| m.to_sym }
