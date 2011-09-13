@@ -1,17 +1,23 @@
 module Absurdity
   class Experiment
     class NotFoundError < RuntimeError; end
+    class FoundError < RuntimeError; end
 
     def self.create(slug, metrics, variants=[])
+      raise FoundError if experiments_list.find { |e| e == slug }
       experiment = new(slug, metrics, variants)
       experiment.save
       experiment
     end
 
     def self.find(slug)
+      raise NotFoundError unless experiments_list.find { |e| e == slug }
       experiment = new(slug)
-      raise NotFoundError if experiment.metrics.nil?
       experiment
+    end
+
+    def self.all
+      experiments_list.map { |exp| new(exp) }
     end
 
     attr_reader :slug
@@ -22,6 +28,7 @@ module Absurdity
     end
 
     def save
+      add_to_experiments_list
       create_variants
       create_metrics
     end
@@ -78,6 +85,15 @@ module Absurdity
 
     private
 
+    def self.experiments_list
+      json_string = Config.instance.redis.get("experiments_list")
+      !json_string.nil? ? JSON.parse(json_string).map { |m| m.to_sym } : []
+    end
+
+    def add_to_experiments_list
+      Config.instance.redis.set("experiments_list", (self.class.experiments_list << slug).to_json)
+    end
+
     def create_metrics
       Config.instance.redis.set("#{base_key}:metrics", @metric_slugs.to_json)
       @metric_slugs.each do |metric_slug|
@@ -102,20 +118,20 @@ module Absurdity
     end
 
     def get_variants
-      metrics_json_string = Config.instance.redis.get("#{base_key}:variants")
-      if !metrics_json_string.nil?
-        JSON.parse(metrics_json_string).map { |v| v.to_sym }
+      json_string = Config.instance.redis.get("#{base_key}:variants")
+      if !json_string.nil?
+        JSON.parse(json_string).map { |v| v.to_sym }
       else
         []
       end
     end
 
     def get_metrics
-      metrics_json_string = Config.instance.redis.get("#{base_key}:metrics")
-      if !metrics_json_string.nil?
-        JSON.parse(metrics_json_string).map { |m| m.to_sym }
+      json_string = Config.instance.redis.get("#{base_key}:metrics")
+      if !json_string.nil?
+        JSON.parse(json_string).map { |m| m.to_sym }
       else
-        metrics_json_string
+        json_string
       end
     end
 
