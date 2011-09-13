@@ -2,20 +2,21 @@ module Absurdity
   class Metric
     class NotFoundError < RuntimeError; end
 
-    def self.create(metric, experiment, variant=nil)
-      metric = new(metric, experiment, variant)
+    def self.create(slug, experiment, variant=nil)
+      metric = new(slug, experiment, variant)
       metric.save
       metric
     end
 
-    def self.find(metric, experiment, variant=nil)
-      metric = new(metric, experiment, variant)
+    def self.find(slug, experiment, variant=nil)
+      metric = new(slug, experiment, variant)
       raise NotFoundError unless Absurdity.redis.exists(metric.key)
       metric
     end
 
-    def initialize(metric, experiment, variant=nil)
-      @metric     = metric
+    attr_reader :slug, :variant
+    def initialize(slug, experiment, variant=nil)
+      @slug       = slug
       @experiment = experiment
       @variant    = variant
     end
@@ -35,15 +36,15 @@ module Absurdity
 
     def key
       key = @experiment.to_s
-      key += @variant ? ":#{@variant}" : ""
-      key += ":#{@metric.to_s}"
+      key += variant ? ":#{variant}" : ""
+      key += ":#{slug}"
       key
     end
 
     def ==(other_metric)
-      @metric     == other_metric.instance_variable_get(:@metric)     &&
+      slug        == other_metric.slug                                &&
       @experiment == other_metric.instance_variable_get(:@experiment) &&
-      @variant    == other_metric.instance_variable_get(:@variant)
+      variant     == other_metric.variant
     end
 
 

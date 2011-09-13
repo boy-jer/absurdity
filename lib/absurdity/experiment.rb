@@ -52,8 +52,7 @@ module Absurdity
     end
 
     def metric(metric_slug, variant=nil)
-      metric_slug = metrics.find { |m| m == metric_slug }
-      Metric.find(metric_slug, @slug, variant)
+      Metric.find(metric_slug, slug, variant)
     end
 
     def ==(other_experiment)
@@ -63,7 +62,20 @@ module Absurdity
     end
 
     def metrics
-      @metrics ||= get_metrics
+      return @metrics unless @metrics.nil?
+      @metrics = []
+      get_metrics.each do |metric_slug|
+        if !variants.empty?
+          variants.each do |variant|
+            p metric_slug
+            p variant
+            @metrics << metric(metric_slug, variant)
+          end
+        else
+          @metrics << metric(metric_slug)
+        end
+      end
+      @metrics
     end
 
     def variants
@@ -81,6 +93,10 @@ module Absurdity
         Config.instance.redis.set("#{base_key}:identity_id:#{identity_id}:variant", variant)
       end
       variant.to_sym
+    end
+
+    def metric_slugs
+      @metric_slugs || get_metrics
     end
 
     private

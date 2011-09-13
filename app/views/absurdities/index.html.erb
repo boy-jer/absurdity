@@ -2,11 +2,12 @@
 <% @experiments.each do |experiment| %>
   <h2><%= experiment.slug.to_s.humanize %></h2>
   <ul>
-    <% experiment.variants.each do |variant_slug| %>
+    <% experiment.variants.each do |variant| %>
       <li>
-        <h3><%= variant_slug.to_s.humanize %></h3>
-        <% experiment.metrics.each do |metric_slug| %>
-          <p><%= "#{metric_slug.to_s.humanize} : #{Absurdity::Metric.find(metric_slug, experiment.slug, variant_slug).count}" %></p>
+        <h3><%= variant.to_s.humanize %></h3>
+        <% experiment.metric_slugs.each do |metric_slug| %>
+          <% metric = Absurdity::Metric.find(metric_slug, experiment.slug, variant) %>
+          <p><%= "#{metric.slug.to_s.humanize} : #{metric.count}" %></p>
         <% end %>
       </li>
     <% end %>
