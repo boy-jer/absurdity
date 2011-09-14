@@ -21,23 +21,19 @@ module Absurdity
     end
 
     def save
-      # this keeps us from resetting a metric to 0
-      redis.get(key) || redis.set(key, 0)
+      Datastore.save_metric(self)
     end
 
     def track!
-      redis.set(key, count + 1)
+      Datastore.inc_metric_count(self)
     end
 
     def count
-      p "COUNT ======================================="
-      p redis.get(key).to_i
-      redis.get(key).to_i
+      Datastore.metric_count(self)
     end
 
     def key
-      key  = experiment_slug.to_s
-      key += variant_slug ? ":#{variant_slug}" : ""
+      key = variant_slug ? "#{variant_slug}" : ""
       key += ":#{slug}"
       key
     end
@@ -47,7 +43,6 @@ module Absurdity
       experiment_slug == other_metric.experiment_slug &&
       variant_slug    == other_metric.variant_slug
     end
-
 
     private
 

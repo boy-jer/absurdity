@@ -39,10 +39,26 @@ module Absurdity
       Experiment.new(slug)
     end
 
+    def self.save_metric(metric)
+      return if find_metric(metric.slug, metric.experiment_slug, metric.variant_slug)
+      set(metric.key, 0, experiment: find_experiment(metric.experiment_slug))
+    end
+
     def self.find_metric(metric_slug, experiment_slug, variant_slug)
       experiment = find_experiment(experiment_slug)
       return nil unless experiment && experiment.metric_slugs.find { |sl| sl == metric_slug }
       Metric.new(metric_slug, experiment_slug, variant_slug)
+    end
+
+    def self.inc_metric_count(metric)
+      experiment = find_experiment(metric.experiment_slug)
+      count = get(metric.key, experiment: experiment).to_i
+      set(metric.key, count + 1, experiment: experiment)
+    end
+
+    def self.metric_count(metric)
+      experiment = find_experiment(metric.experiment_slug)
+      get(metric.key, experiment: experiment).to_i
     end
 
     def self.all_experiments
