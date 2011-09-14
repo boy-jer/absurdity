@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Absurdity::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = "Tim Payton"
-  s.email       = "timpayton@gmail.com"
+  s.email       = "timothy.payton@xing.com"
   s.homepage    = ""
   s.summary     = %q{Absurdly simple a/b testing}
   s.description = %q{See summary}
@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency("redis", ">= 0")
   s.add_dependency("rake", "0.8.7")
+
   s.add_development_dependency("mock_redis", ">= 0")
   s.add_development_dependency("mocha", ">= 0")
   s.add_development_dependency("minitest", ">= 0")

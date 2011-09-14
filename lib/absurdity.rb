@@ -5,9 +5,11 @@ require 'absurdity/engine' if defined?(Rails)
 module Absurdity
   class MissingIdentityIDError < RuntimeError; end
 
-  autoload :Metric,     "absurdity/metric"
   autoload :Config,     "absurdity/config"
   autoload :Experiment, "absurdity/experiment"
+  autoload :Metric,     "absurdity/metric"
+  autoload :Variant,    "absurdity/variant"
+  autoload :Datastore,  "absurdity/datastore"
 
   def self.redis
     Config.instance.redis
@@ -17,19 +19,20 @@ module Absurdity
     Config.instance.redis = redis
   end
 
-  def self.track!(metric, experiment, identity_id=nil)
-    experiment = Experiment.find(experiment)
-    experiment.track!(metric, identity_id)
+  def self.track!(metric_slug, experiment_slug, identity_id=nil)
+    Experiment.find(experiment_slug).track!(metric_slug, identity_id)
   end
 
-  def self.count(metric, experiment)
-    experiment = Experiment.find(experiment)
-    experiment.count(metric)
+  def self.count(metric_slug, experiment_slug)
+    Experiment.find(experiment_slug).count(metric_slug)
   end
 
-  def self.variant(experiment, identity_id)
-    experiment = Experiment.find(experiment)
-    experiment.variant_for(identity_id)
+  def self.variant(experiment_slug, identity_id)
+    Experiment.find(experiment_slug).variant_for(identity_id)
+  end
+
+  def self.report
+    Experiment.report
   end
 
   def self.new_experiment(experiment_slug, metric_slugs, variant_slugs=nil)
@@ -39,4 +42,5 @@ module Absurdity
       Experiment.create(experiment_slug, metric_slugs, variant_slugs)
     end
   end
+
 end

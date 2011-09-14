@@ -91,5 +91,33 @@ class AbsurdityTest < MiniTest::Unit::TestCase
 
     assert_equal :with_photos, Absurdity.variant(:shared_contacts_link, 1)
   end
+
+  def test_report_hash
+    Absurdity.redis = MockRedis.new
+    Absurdity::Experiment.any_instance.expects(:random_variant).returns(:with_photos)
+
+    Absurdity::Experiment.create(:shared_contacts_link,
+                                 [:clicked, :seen],
+                                 [:with_photos, :without_photos])
+
+    2.times { Absurdity.track!(:clicked, :shared_contacts_link, 1) }
+    5.times { Absurdity.track!(:seen, :shared_contacts_link, 1) }
+
+    expected_report = [
+      {
+        shared_contacts_link: {
+          with_photos: {
+            clicked: 2,
+            seen:    5
+          },
+          without_photos: {
+            clicked: 0,
+            seen:    0
+          }
+        }
+      }
+    ]
+    assert_equal expected_report, Absurdity.report
+  end
 end
 

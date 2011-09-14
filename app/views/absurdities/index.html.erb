@@ -1,13 +1,12 @@
 <h1>Experiments</h1>
-<% @experiments.each do |experiment| %>
-  <h2><%= experiment.slug.to_s.humanize %></h2>
+<% @report.each do |experiment, data| %>
+  <h2><%= experiment.to_s.humanize %></h2>
   <ul>
-    <% experiment.variants.each do |variant| %>
+    <% data.each do |variant, metrics| %>
       <li>
         <h3><%= variant.to_s.humanize %></h3>
-        <% experiment.metric_slugs.each do |metric_slug| %>
-          <% metric = Absurdity::Metric.find(metric_slug, experiment.slug, variant) %>
-          <p><%= "#{metric.slug.to_s.humanize} : #{metric.count}" %></p>
+        <% metrics.each do |metric, count| %>
+          <p><%= "#{metric.to_s.humanize} : #{count}" %></p>
         <% end %>
       </li>
     <% end %>

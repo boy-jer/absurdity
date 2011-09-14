@@ -2,23 +2,22 @@ module Absurdity
   class Metric
     class NotFoundError < RuntimeError; end
 
-    def self.create(slug, experiment, variant=nil)
-      metric = new(slug, experiment, variant)
+    def self.create(slug, experiment_slug, variant_slug=nil)
+      metric = new(slug, experiment_slug, variant_slug)
       metric.save
       metric
     end
 
-    def self.find(slug, experiment, variant=nil)
-      metric = new(slug, experiment, variant)
-      raise NotFoundError unless Absurdity.redis.exists(metric.key)
+    def self.find(slug, experiment_slug, variant_slug=nil)
+      raise NotFoundError unless metric = Datastore.find_metric(slug, experiment_slug, variant_slug)
       metric
     end
 
-    attr_reader :slug, :variant
-    def initialize(slug, experiment, variant=nil)
-      @slug       = slug
-      @experiment = experiment
-      @variant    = variant
+    attr_reader :slug, :experiment_slug, :variant_slug
+    def initialize(slug, experiment_slug, variant_slug=nil)
+      @slug            = slug
+      @experiment_slug = experiment_slug
+      @variant_slug    = variant_slug
     end
 
     def save
@@ -31,20 +30,22 @@ module Absurdity
     end
 
     def count
+      p "COUNT ======================================="
+      p redis.get(key).to_i
       redis.get(key).to_i
     end
 
     def key
-      key = @experiment.to_s
-      key += variant ? ":#{variant}" : ""
+      key  = experiment_slug.to_s
+      key += variant_slug ? ":#{variant_slug}" : ""
       key += ":#{slug}"
       key
     end
 
     def ==(other_metric)
-      slug        == other_metric.slug                                &&
-      @experiment == other_metric.instance_variable_get(:@experiment) &&
-      variant     == other_metric.variant
+      slug            == other_metric.slug            &&
+      experiment_slug == other_metric.experiment_slug &&
+      variant_slug    == other_metric.variant_slug
     end
 
 

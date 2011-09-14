@@ -3,44 +3,62 @@ module Absurdity
     class NotFoundError < RuntimeError; end
     class FoundError < RuntimeError; end
 
-    def self.create(slug, metrics, variants=[])
-      raise FoundError if experiments_list.find { |e| e == slug }
-      experiment = new(slug, metrics, variants)
+    def self.create(slug, metric_slugs, variant_slugs=nil)
+      raise FoundError if Datastore.find_experiment(slug)
+      experiment = new(slug, metric_slugs: metric_slugs, variant_slugs: variant_slugs)
       experiment.save
       experiment
     end
 
     def self.find(slug)
-      raise NotFoundError unless experiments_list.find { |e| e == slug }
-      experiment = new(slug)
+      raise NotFoundError unless experiment = Datastore.find_experiment(slug)
       experiment
     end
 
-    def self.all
-      experiments_list.map { |exp| new(exp) }
+    def self.report
+      all.map { |exp| exp.report }
     end
 
-    attr_reader :slug
-    def initialize(slug, metric_slugs=nil, variant_slugs=[])
-      @slug          = slug
-      @metric_slugs  = metric_slugs
-      @variant_slugs = variant_slugs
+    def self.all
+      Datastore.all_experiments
+    end
+
+    attr_reader :slug, :attributes
+    def initialize(slug, attributes = {})
+      @slug       = slug
+      @attributes = attributes
+    end
+
+    def report
+      report = {}
+      report[slug] = {}
+      if variants?
+        variants.each do |variant|
+          report[slug][variant] = {}
+          metric_slugs.each do |metric_slug|
+            report[slug][variant][metric_slug] = metric(metric_slug, variant).count
+          end
+        end
+      else
+        metric_slugs.each do |metric_slug|
+          report[slug][metric_slug] = metric(metric_slug).count
+        end
+      end
+      report
     end
 
     def save
-      add_to_experiments_list
-      create_variants
-      create_metrics
+      Datastore.save_experiment(self)
     end
 
     def track!(metric_slug, identity_id=nil)
-      raise Absurdity::MissingIdentityIDError if identity_based? && identity_id.nil?
-      variant = identity_based? ? variant_for(identity_id) : nil
+      raise Absurdity::MissingIdentityIDError if variants? && identity_id.nil?
+      variant = variants? ? variant_for(identity_id) : nil
       metric(metric_slug, variant).track!
     end
 
     def count(metric_slug)
-      if !variants.empty?
+      if !variants.nil?
         count = {}
         variants.each do |variant|
           count[variant] = metric(metric_slug, variant).count
@@ -64,8 +82,8 @@ module Absurdity
     def metrics
       return @metrics unless @metrics.nil?
       @metrics = []
-      get_metric_slugs.each do |metric_slug|
-        if !variants.empty?
+      metric_slugs.each do |metric_slug|
+        if !variants.nil?
           variants.each { |variant| @metrics << metric(metric_slug, variant) }
         else
           @metrics << metric(metric_slug)
@@ -75,80 +93,36 @@ module Absurdity
     end
 
     def variants
-      @variants ||= get_variants
+      @variants ||= variant_slugs
     end
 
-    def identity_based?
-      @identity_based ||= variants && !variants.empty?
+    def variants?
+      variants && !variants.nil?
     end
 
     def variant_for(identity_id)
-      variant = Config.instance.redis.get("#{base_key}:identity_id:#{identity_id}:variant")
+      key = "identity_id:#{identity_id}:variant"
+      variant = Datastore.get(key, experiment: self)
       if variant.nil?
         variant = random_variant
-        Config.instance.redis.set("#{base_key}:identity_id:#{identity_id}:variant", variant)
+        Datastore.set(key, variant, experiment: self)
       end
       variant.to_sym
     end
 
     def metric_slugs
-      @metric_slugs || get_metric_slugs
+      attributes[:metric_slugs] ||= Datastore.get(:metric_slugs, experiment: self)
+    end
+
+    def variant_slugs
+      attributes[:variant_slugs] ||= Datastore.get(:variant_slugs, experiment: self)
     end
 
     private
 
-    def self.experiments_list
-      json_string = Config.instance.redis.get("experiments_list")
-      !json_string.nil? ? JSON.parse(json_string).map { |m| m.to_sym } : []
-    end
-
-    def add_to_experiments_list
-      Config.instance.redis.set("experiments_list", (self.class.experiments_list << slug).to_json)
-    end
-
-    def create_metrics
-      Config.instance.redis.set("#{base_key}:metrics", @metric_slugs.to_json)
-      @metric_slugs.each do |metric_slug|
-        if !@variant_slugs.empty?
-          @variant_slugs.each do |variant_slug|
-            Metric.create(metric_slug, slug, variant_slug)
-          end
-        else
-          Metric.create(metric_slug, slug)
-        end
-      end
-    end
-
-    def create_variants
-      if !@variant_slugs.empty?
-        Config.instance.redis.set("#{base_key}:variants", @variant_slugs.to_json)
-      end
-    end
-
-    def base_key
-      "experiments:#{slug}"
-    end
-
-    def get_variants
-      json_string = Config.instance.redis.get("#{base_key}:variants")
-      if !json_string.nil?
-        JSON.parse(json_string).map { |v| v.to_sym }
-      else
-        []
-      end
-    end
-
-    def get_metric_slugs
-      json_string = Config.instance.redis.get("#{base_key}:metrics")
-      if !json_string.nil?
-        JSON.parse(json_string).map { |m| m.to_sym }
-      else
-        json_string
-      end
-    end
-
     def random_variant
-      variants.sort_by{rand}[0]
+      variants.sort_by { rand }[0]
     end
+
   end
 end
