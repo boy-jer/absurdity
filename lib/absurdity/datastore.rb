@@ -28,6 +28,7 @@ module Absurdity
       elsif klass == Absurdity::Metric
         find_metric(options[:slug], options[:experiment_slug], options[:variant_slug])
       elsif klass == Absurdity::Variant
+        find_variant(options[:identity_id], options[:experiment_slug])
       end
     end
 
@@ -56,6 +57,12 @@ module Absurdity
       metric
     end
 
+    def self.find_variant(identity_id, experiment_slug)
+      experiment = find_experiment(experiment_slug)
+      return nil unless slug = get(variant_key(identity_id), experiment: experiment)
+      Variant.new(slug, experiment_slug, identity_id)
+    end
+
     def self.all_experiments
       experiments_list.map { |exp| find_experiment(exp) }
     end
@@ -71,6 +78,10 @@ module Absurdity
       add_to_experiments_list(experiment.slug)
       create_variants(experiment)
       create_metrics(experiment)
+    end
+
+    def self.save_variant(variant)
+      set(variant_key(variant.identity_id), variant.slug, experiment: find_experiment(variant.experiment_slug))
     end
 
 
@@ -116,6 +127,10 @@ module Absurdity
       key = metric.variant_slug ? "#{metric.variant_slug}" : ""
       key += ":#{metric.slug}:count"
       key
+    end
+
+    def self.variant_key(identity_id)
+      "identity_id:#{identity_id}:variant"
     end
 
     def self.experiments_list

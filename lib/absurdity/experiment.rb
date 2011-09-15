@@ -93,13 +93,12 @@ module Absurdity
     end
 
     def variant_for(identity_id)
-      key = "identity_id:#{identity_id}:variant"
-      variant = Datastore.get(key, experiment: self)
+      variant = Variant.find(identity_id, slug)
       if variant.nil?
-        variant = random_variant
-        Datastore.set(key, variant.to_s, experiment: self)
+        variant = Variant.new(random_variant, slug, identity_id)
+        variant.save
       end
-      variant
+      variant.slug
     end
 
     def metrics_list
