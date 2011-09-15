@@ -30,18 +30,17 @@ module Absurdity
     end
 
     def report
-      report = {}
-      report[slug] = {}
+      report = { name: slug, data: {} }
       if variants?
         variants_list.each do |variant|
-          report[slug][variant] = {}
+          report[:data][variant] = {}
           metrics_list.each do |metric_slug|
-            report[slug][variant][metric_slug] = metric(metric_slug, variant).count
+            report[:data][variant][metric_slug] = metric(metric_slug, variant).count
           end
         end
       else
         metrics_list.each do |metric_slug|
-          report[slug][metric_slug] = metric(metric_slug).count
+          report[:data][metric_slug] = metric(metric_slug).count
         end
       end
       report

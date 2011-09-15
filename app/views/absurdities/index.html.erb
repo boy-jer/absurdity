@@ -1,8 +1,8 @@
 <h1>Experiments</h1>
-<% @report.each do |experiment, data| %>
-  <h2><%= experiment.to_s.humanize %></h2>
+<% @report.each do |experiment| %>
+  <h2><%= experiment[:name].to_s.humanize %></h2>
   <ul>
-    <% data.each do |variant, metrics| %>
+    <% experiment[:data].each do |variant, metrics| %>
       <li>
         <h3><%= variant.to_s.humanize %></h3>
         <% metrics.each do |metric, count| %>
