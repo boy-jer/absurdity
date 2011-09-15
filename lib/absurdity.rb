@@ -35,11 +35,11 @@ module Absurdity
     Experiment.report
   end
 
-  def self.new_experiment(experiment_slug, metric_slugs, variant_slugs=nil)
+  def self.new_experiment(experiment_slug, metrics_list, variants_list=nil)
     begin
       experiment = Experiment.find(experiment_slug)
     rescue Experiment::NotFoundError
-      Experiment.create(experiment_slug, metric_slugs, variant_slugs)
+      Experiment.create(experiment_slug, metrics_list, variants_list)
     end
   end
 

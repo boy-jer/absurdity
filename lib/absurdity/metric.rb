@@ -9,7 +9,10 @@ module Absurdity
     end
 
     def self.find(slug, experiment_slug, variant_slug=nil)
-      raise NotFoundError unless metric = Datastore.find_metric(slug, experiment_slug, variant_slug)
+      raise NotFoundError unless metric = Datastore.find(self,
+                                                         slug:            slug,
+                                                         experiment_slug: experiment_slug,
+                                                         variant_slug:    variant_slug)
       metric
     end
 
@@ -21,33 +24,22 @@ module Absurdity
     end
 
     def save
-      Datastore.save_metric(self)
+      Datastore.save(self)
     end
 
     def track!
-      Datastore.inc_metric_count(self)
+      @count += 1
+      save
     end
 
     def count
-      Datastore.metric_count(self)
-    end
-
-    def key
-      key = variant_slug ? "#{variant_slug}" : ""
-      key += ":#{slug}"
-      key
+      @count ||= 0
     end
 
     def ==(other_metric)
       slug            == other_metric.slug            &&
       experiment_slug == other_metric.experiment_slug &&
       variant_slug    == other_metric.variant_slug
-    end
-
-    private
-
-    def redis
-      Absurdity.redis
     end
 
   end

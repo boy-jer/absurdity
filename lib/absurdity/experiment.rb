@@ -3,15 +3,15 @@ module Absurdity
     class NotFoundError < RuntimeError; end
     class FoundError < RuntimeError; end
 
-    def self.create(slug, metric_slugs, variant_slugs=nil)
-      raise FoundError if Datastore.find_experiment(slug)
-      experiment = new(slug, metric_slugs: metric_slugs, variant_slugs: variant_slugs)
+    def self.create(slug, metrics_list, variants_list=nil)
+      raise FoundError if Datastore.find(self, slug: slug)
+      experiment = new(slug, metrics_list: metrics_list, variants_list: variants_list)
       experiment.save
       experiment
     end
 
     def self.find(slug)
-      raise NotFoundError unless experiment = Datastore.find_experiment(slug)
+      raise NotFoundError unless experiment = Datastore.find(self, slug: slug)
       experiment
     end
 
@@ -33,14 +33,14 @@ module Absurdity
       report = {}
       report[slug] = {}
       if variants?
-        variants.each do |variant|
+        variants_list.each do |variant|
           report[slug][variant] = {}
-          metric_slugs.each do |metric_slug|
+          metrics_list.each do |metric_slug|
             report[slug][variant][metric_slug] = metric(metric_slug, variant).count
           end
         end
       else
-        metric_slugs.each do |metric_slug|
+        metrics_list.each do |metric_slug|
           report[slug][metric_slug] = metric(metric_slug).count
         end
       end
@@ -58,9 +58,9 @@ module Absurdity
     end
 
     def count(metric_slug)
-      if !variants.nil?
+      if variants?
         count = {}
-        variants.each do |variant|
+        variants_list.each do |variant|
           count[variant] = metric(metric_slug, variant).count
         end
       else
@@ -74,17 +74,17 @@ module Absurdity
     end
 
     def ==(other_experiment)
-      slug            == other_experiment.slug &&
-      metrics         == other_experiment.metrics &&
-      variants        == other_experiment.variants
+      slug            == other_experiment.slug         &&
+      metrics_list    == other_experiment.metrics_list &&
+      variants_list   == other_experiment.variants_list
     end
 
     def metrics
       return @metrics unless @metrics.nil?
       @metrics = []
-      metric_slugs.each do |metric_slug|
-        if !variants.nil?
-          variants.each { |variant| @metrics << metric(metric_slug, variant) }
+      metrics_list.each do |metric_slug|
+        if variants?
+          variants_list.each { |variant| @metrics << metric(metric_slug, variant) }
         else
           @metrics << metric(metric_slug)
         end
@@ -92,36 +92,32 @@ module Absurdity
       @metrics
     end
 
-    def variants
-      @variants ||= variant_slugs
-    end
-
-    def variants?
-      variants && !variants.nil?
-    end
-
     def variant_for(identity_id)
       key = "identity_id:#{identity_id}:variant"
       variant = Datastore.get(key, experiment: self)
       if variant.nil?
         variant = random_variant
-        Datastore.set(key, variant, experiment: self)
+        Datastore.set(key, variant.to_s, experiment: self)
       end
-      variant.to_sym
+      variant
     end
 
-    def metric_slugs
-      attributes[:metric_slugs] ||= Datastore.get(:metric_slugs, experiment: self)
+    def metrics_list
+      attributes[:metrics_list]
     end
 
-    def variant_slugs
-      attributes[:variant_slugs] ||= Datastore.get(:variant_slugs, experiment: self)
+    def variants_list
+      attributes[:variants_list]
+    end
+
+    def variants?
+      variants_list
     end
 
     private
 
     def random_variant
-      variants.sort_by { rand }[0]
+      variants_list.sort_by { rand }[0]
     end
 
   end
