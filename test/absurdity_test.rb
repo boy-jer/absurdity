@@ -105,7 +105,8 @@ class AbsurdityTest < MiniTest::Unit::TestCase
 
     expected_report = [
       {
-        shared_contacts_link: {
+        name: :shared_contacts_link,
+        data: {
           with_photos: {
             clicked: 2,
             seen:    5

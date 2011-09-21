@@ -6,7 +6,7 @@
       <li>
         <h3><%= variant.to_s.humanize %></h3>
         <% metrics.each do |metric, count| %>
-          <p><%= "#{metric.to_s.humanize} : #{count}" %></p>
+          <p><%= metric_info(metrics, metric, count) %></p>
         <% end %>
       </li>
     <% end %>
