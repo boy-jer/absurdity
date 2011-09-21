@@ -97,10 +97,12 @@ module Absurdity
 
     def self.get(key, options={})
       if experiment = options[:experiment]
-        string = redis.get("experiments:#{experiment.slug}:#{key}")
+        store_key = "experiments:#{experiment.slug}:#{key}"
       else
-        string = redis.get("experiments:#{key}")
+        store_key = "experiments:#{key}"
       end
+      logger.info "REDIS attempt to access key => #{store_key} and returns #{redis.get(store_key)}"
+      string = redis.get(store_key)
       if string.to_i.to_s == string
         string.to_i
       elsif PARSE_AS_JSON.include?(key)
@@ -112,10 +114,12 @@ module Absurdity
 
     def self.set(key, value, options={})
       if experiment = options[:experiment]
-        redis.set("experiments:#{experiment.slug}:#{key}", value)
+        store_key = "experiments:#{experiment.slug}:#{key}"
       else
-        redis.set("experiments:#{key}", value)
+        store_key = "experiments:#{key}"
       end
+      logger.info "REDIS attempt to set key => #{store_key} to value => #{value}"
+      redis.set(store_key, value)
     end
 
     def self.metric_count(metric)
@@ -158,6 +162,10 @@ module Absurdity
       if !experiment.variants_list.nil?
         set(:variants_list, experiment.variants_list.to_json, experiment: experiment)
       end
+    end
+
+    def self.logger
+      Config.instance.logger
     end
 
   end
