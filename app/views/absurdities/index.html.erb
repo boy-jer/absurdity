@@ -1,14 +1,4 @@
 <h1>Experiments</h1>
-<% @report.each do |experiment| %>
-  <h2><%= experiment[:name].to_s.humanize %></h2>
-  <ul>
-    <% experiment[:data].each do |variant, metrics| %>
-      <li>
-        <h3><%= variant.to_s.humanize %></h3>
-        <% metrics.each do |metric, count| %>
-          <p><%= metric_info(metrics, metric, count) %></p>
-        <% end %>
-      </li>
-    <% end %>
-  </ul>
+<% @reports.each do |report| %>
+<h2><%= link_to report[:name].to_s.humanize, absurdity_path(report[:name]) %></h2>
 <% end %>

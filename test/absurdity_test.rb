@@ -118,7 +118,7 @@ class AbsurdityTest < MiniTest::Unit::TestCase
         }
       }
     ]
-    assert_equal expected_report, Absurdity.report
+    assert_equal expected_report, Absurdity.reports
   end
 end
 

@@ -15,7 +15,7 @@ module Absurdity
       experiment
     end
 
-    def self.report
+    def self.reports
       all.map { |exp| exp.report }
     end
 

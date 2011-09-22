@@ -2,6 +2,6 @@ Rails.application.routes.draw do
 
   resources :absurdities,
             :format => :html,
-            :only => [:index]
+            :only   => [:index, :show, :create]
 
 end

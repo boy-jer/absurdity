@@ -1,5 +1,10 @@
 module Absurdity
   class Datastore
+    PARSE_AS_JSON = [
+      :metrics_list,
+      :variants_list,
+      :experiments_list
+    ]
 
     def self.save(object)
       klass = object.class
@@ -84,24 +89,12 @@ module Absurdity
       set(variant_key(variant.identity_id), variant.slug, experiment: find_experiment(variant.experiment_slug))
     end
 
-
-
-
-
-
-    PARSE_AS_JSON = [
-      :metrics_list,
-      :variants_list,
-      :experiments_list
-    ]
-
     def self.get(key, options={})
       if experiment = options[:experiment]
         store_key = "experiments:#{experiment.slug}:#{key}"
       else
         store_key = "experiments:#{key}"
       end
-      logger.info "REDIS attempt to access key => #{store_key} and returns #{redis.get(store_key)}"
       string = redis.get(store_key)
       if string.to_i.to_s == string
         string.to_i
@@ -118,7 +111,6 @@ module Absurdity
       else
         store_key = "experiments:#{key}"
       end
-      logger.info "REDIS attempt to set key => #{store_key} to value => #{value}"
       redis.set(store_key, value)
     end
 

@@ -1,0 +1,12 @@
+<h1>Experiment</h1>
+<h2><%= @report[:name].to_s.humanize %></h2>
+<ul>
+  <% @report[:data].each do |variant, metrics| %>
+    <li>
+      <h3><%= variant.to_s.humanize %></h3>
+      <% metrics.each do |metric, count| %>
+        <p><%= metric_info(metrics, metric, count) %></p>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

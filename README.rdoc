@@ -7,6 +7,7 @@ http://github.com/xing/absurdity
 ==Prerequisites
 
 Redis
+Rails 3.0.*
 
 ==Installation
 
@@ -49,6 +50,10 @@ Redis
     end
   end
 
+===View Metrics
+
+  /absurdities                 => linked list of experiments
+  /absurdities/experiment_name => show experiment
 
 ==Authors
 

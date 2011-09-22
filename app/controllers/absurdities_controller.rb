@@ -3,11 +3,16 @@ class AbsurditiesController < ApplicationController
   layout "absurdities"
 
   def index
-    @report = Absurdity.report
+    @reports = Absurdity.reports
   end
 
   def show
-    @report = Experiment.find(params[:id]).report
+    @report = Absurdity::Experiment.find(params[:id].to_sym).report
+  end
+
+  def create
+    Absurdity.track!(params[:metric], params[:experiment], params[:identity_id])
+    render nothing: true
   end
 
 end

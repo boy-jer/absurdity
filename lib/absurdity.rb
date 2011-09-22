@@ -31,8 +31,8 @@ module Absurdity
     Experiment.find(experiment_slug).variant_for(identity_id)
   end
 
-  def self.report
-    Experiment.report
+  def self.reports
+    Experiment.reports
   end
 
   def self.new_experiment(experiment_slug, metrics_list, variants_list=nil)
