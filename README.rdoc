@@ -6,8 +6,8 @@ http://github.com/xing/absurdity
 
 ==Prerequisites
 
-Redis
-Rails 3.0.*
+Redis (tested with 1.2.6)
+Rails (tested with 3.0.10)
 
 ==Installation
 
