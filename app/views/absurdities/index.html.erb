@@ -1,4 +1,7 @@
 <h1>Experiments</h1>
 <% @reports.each do |report| %>
-<h2><%= link_to report[:name].to_s.humanize, absurdity_path(report[:name]) %></h2>
+<h2>
+  <%= link_to report[:name].to_s.humanize, absurdity_path(report[:name]) %>
+  <%= completed_text(report[:completed]) %>
+</h2>
 <% end %>

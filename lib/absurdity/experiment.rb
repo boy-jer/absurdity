@@ -30,7 +30,7 @@ module Absurdity
     end
 
     def report
-      report = { name: slug, data: {} }
+      report = { name: slug, completed: completed, data: {} }
       if variants?
         variants_list.each do |variant|
           report[:data][variant] = {}
@@ -54,6 +54,15 @@ module Absurdity
       raise Absurdity::MissingIdentityIDError if variants? && identity_id.nil?
       variant = variants? ? variant_for(identity_id) : nil
       metric(metric_slug, variant).track!
+    end
+
+    def complete(variant_slug)
+      @attributes[:completed] = variant_slug
+      save
+    end
+
+    def completed
+      @attributes[:completed]
     end
 
     def count(metric_slug)
@@ -92,10 +101,14 @@ module Absurdity
     end
 
     def variant_for(identity_id)
-      variant = Variant.find(identity_id, slug)
-      if variant.nil?
-        variant = Variant.new(random_variant, slug, identity_id)
-        variant.save
+      if completed
+        variant = Variant.new(completed, slug, identity_id)
+      else
+        variant = Variant.find(identity_id, slug)
+        if variant.nil?
+          variant = Variant.new(random_variant, slug, identity_id)
+          variant.save
+        end
       end
       variant.slug
     end

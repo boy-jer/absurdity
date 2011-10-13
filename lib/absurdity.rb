@@ -43,4 +43,9 @@ module Absurdity
     end
   end
 
+  def self.complete(experiment_slug, variant_slug)
+    experiment = Experiment.find(experiment_slug)
+    experiment.complete(variant_slug)
+  end
+
 end

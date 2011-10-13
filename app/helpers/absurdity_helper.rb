@@ -3,7 +3,17 @@ module AbsurdityHelper
   def metric_info(metrics, metric, count)
     str  = "#{metric.to_s.humanize}"
     str += ": #{count} "
-    str += metric_ratios(metrics, metric, count)
+    # str += metric_ratios(metrics, metric, count)
+  end
+
+  def completed_text(completed)
+    if completed == :completed
+      "(Completed)"
+    elsif completed
+      "(Completed: #{completed})"
+    else
+      ""
+    end
   end
 
   private

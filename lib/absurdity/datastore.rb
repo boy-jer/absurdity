@@ -51,6 +51,7 @@ module Absurdity
       experiment = Experiment.new(slug)
       experiment.attributes[:metrics_list]  = get(:metrics_list, experiment: experiment)
       experiment.attributes[:variants_list] = get(:variants_list, experiment: experiment)
+      experiment.attributes[:completed]     = get(:completed, experiment: experiment)
       experiment
     end
 
@@ -80,9 +81,12 @@ module Absurdity
     end
 
     def self.save_experiment(experiment)
-      add_to_experiments_list(experiment.slug)
-      create_variants(experiment)
-      create_metrics(experiment)
+      unless find_experiment(experiment.slug)
+        add_to_experiments_list(experiment.slug)
+        create_variants(experiment)
+        create_metrics(experiment)
+      end
+      mark_completed(experiment) if experiment.completed
     end
 
     def self.save_variant(variant)
@@ -154,6 +158,10 @@ module Absurdity
       if !experiment.variants_list.nil?
         set(:variants_list, experiment.variants_list.to_json, experiment: experiment)
       end
+    end
+
+    def self.mark_completed(experiment)
+      set(:completed, experiment.completed, experiment: experiment)
     end
 
     def self.logger
