@@ -53,7 +53,7 @@ module Absurdity
     def track!(metric_slug, identity_id=nil)
       raise Absurdity::MissingIdentityIDError if variants? && identity_id.nil?
       variant = variants? ? variant_for(identity_id) : nil
-      metric(metric_slug, variant).track!
+      metric(metric_slug, variant).track! unless completed
     end
 
     def complete(variant_slug)
