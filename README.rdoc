@@ -18,20 +18,43 @@ Rails (tested with 3.0.10)
 ===Define Experiments
 
   mkdir "absurdity" in your rails app root directory
-  touch "absurdity/experiments.rb"
+  touch "absurdity/experiments.yml"
 
   define your experiments in this file:
-
-  Absurdity.new_experiment :wild_side
-                           [:fun, :hangover],
-                           [:with_music, :without_music]
-
-  I don't recommend changing these once they are in production.
-  It might be bad...
+  :experiments:
+    :wild_side:
+      :metrics:
+        [
+          :fun,
+          :hangover
+        ]
+      :variants:
+        [
+          :with_music,
+          :without_music
+        ]
+    :walk:
+      :metrics:
+        [
+          :sun,
+          :rain
+        ]
+      :variants:
+        [
+          :slow,
+          :fast
+        ]
+      :completed:
+        :fast
 
   :wild_side will be the name of your experiment
   [:fun, :hangover] will be the metrics you wish to track
   [:with_music, :without_music] will be the variants you wish to vary
+
+  the :walk has been marked as completed.
+  You should identify which variant to show here (:fast).
+  Now everyone will only see the :fast variant.
+  And, no one will produce any metric tracking.
 
 ===Usage in a controller
 
