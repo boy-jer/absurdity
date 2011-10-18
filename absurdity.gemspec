@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "absurdity"
 
   s.add_dependency("redis", ">= 0")
-  s.add_dependency("rake", "~> 0.8.7")
+  s.add_dependency("rake", ">= 0.8.7")
 
   s.add_development_dependency("mock_redis", ">= 0")
   s.add_development_dependency("mocha", ">= 0")

@@ -1,7 +1,12 @@
-<h1>Experiments</h1>
+<header>
+  <h1>Experiments</h1>
+</header>
+
+<ul class="reports">
 <% @reports.each do |report| %>
-<h2>
-  <%= link_to report[:name].to_s.humanize, absurdity_path(report[:name]) %>
-  <%= completed_text(report[:completed]) %>
-</h2>
+  <li>
+    <%= link_to report[:name].to_s.humanize, absurdity_path(report[:name]) %>
+    <%= completed_text(report[:completed]) %>
+  </li>
 <% end %>
+</ul>

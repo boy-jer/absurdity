@@ -6,14 +6,24 @@ http://github.com/xing/absurdity
 
 ==Prerequisites
 
-Redis (tested with 1.2.6)
-Rails (tested with 3.0.10)
+Redis (tested with 1.2.6, 2.2.2)
+Rails (tested with 3.0.10, 3.1.0)
 
 ==Installation
 
   gem "absurdity"
 
 ==Usage
+
+===Instantiate a Redis client
+
+  Put this in an initializer, for expample config/initializers/redis_absurdity.rb:
+
+  Absurdity.redis = Redis.new(:host => "localhost", :port => 6379)
+
+Note: More often you will use a redis.conf to set up your redis client, the important part is to assign your
+redis client instance to Absurdity.redis .
+Don't forget to start your Redis server.
 
 ===Define Experiments
 
@@ -24,26 +34,18 @@ Rails (tested with 3.0.10)
   :experiments:
     :wild_side:
       :metrics:
-        [
-          :fun,
-          :hangover
-        ]
+          - :fun
+          - :hangover
       :variants:
-        [
-          :with_music,
-          :without_music
-        ]
+          - :with_music
+          - :without_music
     :walk:
       :metrics:
-        [
-          :sun,
-          :rain
-        ]
+          - :sun
+          - :rain
       :variants:
-        [
-          :slow,
-          :fast
-        ]
+          - :slow
+          - :fast
       :completed:
         :fast
 
@@ -55,6 +57,9 @@ Rails (tested with 3.0.10)
   You should identify which variant to show here (:fast).
   Now everyone will only see the :fast variant.
   And, no one will produce any metric tracking.
+
+  Note: You can't use the shortform for declaring an array of symbols in ruby 1.9.2 and Psych.
+  So instead of using :metrics: [:fun, :hangover] use the longer form shown above.
 
 ===Usage in a controller
 
