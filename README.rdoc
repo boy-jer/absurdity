@@ -86,6 +86,7 @@ Don't forget to start your Redis server.
 ==Authors
 
 {Tim Payton}[http://github.com/dizzy42]
+{Ömür Özkir}[http://github.com/oem]
 
 Please find out more about our work in our
 {tech blog}[http://blog.xing.com/category/english/tech-blog].
@@ -95,7 +96,7 @@ Please find out more about our work in our
 
 The MIT License
 
-Copyright (c) 2009 {XING AG}[http://www.xing.com/]
+Copyright (c) 2011 {XING AG}[http://www.xing.com/]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

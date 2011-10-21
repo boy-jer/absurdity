@@ -6,9 +6,9 @@ Gem::Specification.new do |s|
   s.name        = "absurdity"
   s.version     = Absurdity::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = "Tim Payton"
-  s.email       = "timothy.payton@xing.com"
-  s.homepage    = ""
+  s.authors     = ["Tim Payton", "Ömür Özkir"]
+  s.email       = "opensource@xing.com"
+  s.homepage    = "http://xing.github.com/absurdity/"
   s.summary     = %q{Absurdly simple a/b testing}
   s.description = %q{See summary}
 
