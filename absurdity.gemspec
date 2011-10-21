@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Tim Payton", "Ömür Özkir"]
   s.email       = "opensource@xing.com"
-  s.homepage    = "http://xing.github.com/absurdity/"
+  s.homepage    = "http://www.github.com/xing/absurdity/"
   s.summary     = %q{Absurdly simple a/b testing}
   s.description = %q{See summary}
 
