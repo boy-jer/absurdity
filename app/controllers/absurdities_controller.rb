@@ -3,7 +3,7 @@ class AbsurditiesController < ApplicationController
   layout "absurdities"
 
   def index
-    @reports = Absurdity.reports
+    @reports = Absurdity::Experiment.reports
   end
 
   def show

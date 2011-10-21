@@ -11,10 +11,6 @@ module Absurdity
   autoload :Variant,    "absurdity/variant"
   autoload :Datastore,  "absurdity/datastore"
 
-  def self.redis
-    Config.instance.redis
-  end
-
   def self.redis=(redis)
     Config.instance.redis = redis
   end
@@ -23,29 +19,8 @@ module Absurdity
     Experiment.find(experiment_slug).track!(metric_slug, identity_id)
   end
 
-  def self.count(metric_slug, experiment_slug)
-    Experiment.find(experiment_slug).count(metric_slug)
-  end
-
   def self.variant(experiment_slug, identity_id)
     Experiment.find(experiment_slug).variant_for(identity_id)
-  end
-
-  def self.reports
-    Experiment.reports
-  end
-
-  def self.new_experiment(experiment_slug, metrics_list, variants_list=nil)
-    begin
-      experiment = Experiment.find(experiment_slug)
-    rescue Experiment::NotFoundError
-      Experiment.create(experiment_slug, metrics_list, variants_list)
-    end
-  end
-
-  def self.complete(experiment_slug, variant_slug)
-    experiment = Experiment.find(experiment_slug)
-    experiment.complete(variant_slug)
   end
 
 end
